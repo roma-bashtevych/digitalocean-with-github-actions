@@ -16,7 +16,7 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
       - name: Deploy with rsync
         run: rsync -avz ./dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/zellwk/zellwk.com/dist/
-#    steps:#
+#    steps:
 #      - name: Deploy NodeJS app
 #        uses: appleboy/ssh-action@v0.1.2
 #        with:
