@@ -1,88 +1,112 @@
-name: Backend deploy
+#name: Backend deploy
+#on:
+#  push:
+#    branches:
+#      - "master"
+#jobs:
+#  deploy:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - run: echo 'Hello!'
+#      - name: Install SSH Key
+#        uses: shimataro/ssh-key-action@v2
+#        with:
+#          key: ${{ secrets.SSH_KEY }}
+#          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+#      - name: Adding Known Hosts
+#        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hos
+#      - name: Build and push
+#      uses: docker/build-push-action@v2
+#        with:
+#          context: ./
+#          file: ./Dockerfile
+#          builder: ${{ steps.buildx.outputs.name }}
+#          push: true
+#          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:latest
+#          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:buildcache
+#          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:buildcache,mode=max
+name: deploy
 on:
   push:
     branches:
       - "master"
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-        - run: echo 'Hello!'
-        - name: Install SSH Key
-          uses: shimataro/ssh-key-action@v2
-          with:
-            key: ${{ secrets.SSH_KEY }}
-            known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
-        - name: Adding Known Hosts
-          run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hos
-        - name: Build and push
-        uses: docker/build-push-action@v2
-          with:
-            context: ./
-            file: ./Dockerfile
-            builder: ${{ steps.buildx.outputs.name }}
-            push: true
-            tags: ${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:latest
-            cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:buildcache
-            cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:buildcache,mode=max
-#      - name: Clear docker cache
+      # Checkout
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          npm install
+      # Init .env and ca-certificate.crt files on build machine
+#      - name: Init .env files on build machine
 #        run: |
-#          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-#          cd ${{ secrets.DOCKER_HUB_USERNAME }}
-#          docker rmi -f $(docker images -aq)
-#          docker system prune -f
-#          "
-#      # Shut down docker-composer
-#      - name: Shut down docker-composer
-#      run: |
-#          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-#            cd ${{ secrets.DOCKER_HUB_USERNAME }}
-#            if [ -f "docker-compose.yml" ]; then
-#                docker-compose down
-#                docker-compose rm -a
-#                docker rmi -f $(docker images -aq)
-#                docker ps -a
-#            fi
-#          "
-#      # Delete old files from server
-#      - name: Delete old files from server
-#      run: |
-#          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-#            rm -rf ${{ secrets.DOCKER_HUB_USERNAME }}
-#            mkdir ${{ secrets.DOCKER_HUB_USERNAME }}
-#          "
-#      # Copy files to server
-#      - name: Copy files to server
-#      run: |
-#          scp -r * ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/;
-#          scp .env ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/.env;
-#      # Start docker-composer
-#      - name: Start docker-composer
-#      run: |
-#          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-#            cd ${{ secrets.DOCKER_HUB_USERNAME }}
-#            docker-compose -f "docker-compose.yml" up -d --build
-#            docker ps -a
-#          "
-#      # PING
-#      - name: PING
-#      run: |
-#          sleep 5
-#          PING=$(curl ${{ secrets.SSH_HOST }}:3000/ping)
-#          echo $PING
-#          if [ "$PING" != "\"pong\"" ]; then
-#            exit 1
-#          fi
-#    steps:
-#      - name: Deploy NodeJS app
-#        uses: appleboy/ssh-action@v0.1.2
-#        with:
-#          host: ${{secrets.SSH_HOST}} # IP address of the server you wish to ssh into
-#          key: ${{secrets.SSH_KEY}} # Private or public key of the server
-#          username: ${{ secrets.SSH_USERNAME }} # User of the server you want to ssh int
-#
-#          script: |
-#            mkdir test
-#            cd test
-#            git clone git@github.com:/roma-bashtevych/digitalocean-with-github-actions.git
-#            echo 'Deployment successful to digital ocean'
+#          /usr/bin/printf '${{ secrets.ENV_FILE }}' > .env
+#          /usr/bin/printf '${{ secrets.MONGO_PRIVATE_KEY }}' > ca-certificate.crt
+      # Run tests
+#      - name: Run tests
+#        run: npm test
+      # Remove node_modules
+      - name: Remove node_modules
+        run: rm -rf node_modules
+      # Create SSH connection
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2.3.1
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      # Clear docker cache
+      - name: Clear docker cache
+        run: |
+          ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
+            cd ${{ secrets.DOCKER_HUB_USERNAME }}
+            docker rmi -f $(docker images -aq)
+            docker system prune -f
+          "
+      # Shut down docker-composer
+      - name: Shut down docker-composer
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            cd ${{ secrets.DOCKER_HUB_USERNAME }}
+            if [ -f "docker-compose.yml" ]; then
+                docker-compose down
+                docker-compose rm -a
+                docker rmi -f $(docker images -aq)
+                docker ps -a
+            fi
+          "
+      # Delete old files from server
+      - name: Delete old files from server
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            rm -rf ${{ secrets.DOCKER_HUB_USERNAME }}
+            mkdir ${{ secrets.DOCKER_HUB_USERNAME }}
+          "
+      # Copy files to server
+      - name: Copy files to server
+        run: |
+          scp -r * ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/;
+          scp .env ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/.env;
+      # Start docker-composer
+      - name: Start docker-composer
+        run: |
+          ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
+            cd ${{ secrets.DOCKER_HUB_USERNAME }}
+            docker-compose -f "docker-compose.yml" up -d --build
+            docker ps -a
+          "
+      # PING
+      - name: PING
+        run: |
+          sleep 5
+          PING=$(curl ${{ secrets.SSH_HOST }}:3000/ping)
+          echo $PING
+          if [ "$PING" != "\"pong\"" ]; then
+            exit 1
+          fi
