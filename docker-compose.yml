@@ -4,11 +4,11 @@ services:
     image: nodejs
     ports:
       - "5000:5000"
-#  web:
-#    image: nginx:alpine
-#    ports:
-#      - "80:80"
-#    restart: on-failure
-#    volumes:
-#      - ./client:/usr/share/nginx/html
-#      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    restart: on-failure
+    volumes:
+      - ./client:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
