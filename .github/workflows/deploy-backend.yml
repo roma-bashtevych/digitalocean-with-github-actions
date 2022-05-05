@@ -89,10 +89,10 @@ jobs:
             mkdir ${{ secrets.DOCKER_HUB_USERNAME }}
           "
       # Copy files to server
-      - name: Copy files to server
-        run: |
-          scp -r * ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/;
-          scp .env ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/.env;
+#      - name: Copy files to server
+#        run: |
+#          scp -r * ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/;
+#          scp .env ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/.env;
       # Start docker-composer
       - name: Start docker-composer
         run: |
