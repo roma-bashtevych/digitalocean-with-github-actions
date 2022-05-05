@@ -72,7 +72,7 @@ jobs:
       # Shut down docker-composer
       - name: Shut down docker-composer
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
             cd ${{ secrets.DOCKER_HUB_USERNAME }}
             if [ -f "docker-compose.yml" ]; then
                 docker-compose down
@@ -84,7 +84,7 @@ jobs:
       # Delete old files from server
       - name: Delete old files from server
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
             rm -rf ${{ secrets.DOCKER_HUB_USERNAME }}
             mkdir ${{ secrets.DOCKER_HUB_USERNAME }}
           "
