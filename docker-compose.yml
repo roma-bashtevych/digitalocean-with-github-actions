@@ -10,5 +10,5 @@ services:
       - "80:80"
     restart: on-failure
     volumes:
-      - ./var/www/:/usr/share/nginx/html
+      - /var/www/:/usr/share/nginx/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
