@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    image: nodejs
+    ports:
+      - "5000:3000"
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    restart: on-failure
+    volumes:
+      - ./client:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
