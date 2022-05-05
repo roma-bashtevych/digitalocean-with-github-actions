@@ -3,7 +3,7 @@ services:
     build: .
     image: nodejs
     ports:
-      - "5000:5000"
+      - "5000:api"
 #  web:
 #    image: nginx:alpine
 #    ports:
