@@ -93,7 +93,7 @@ jobs:
         run: |
           scp -r * ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/;
 #          scp .env ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:./${{ secrets.DOCKER_HUB_USERNAME }}/.env;
-      # Start docker-composer
+      # Start docker-compose
       - name: Start docker-composer
         run: |
           ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
