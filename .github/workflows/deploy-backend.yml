@@ -102,11 +102,11 @@ jobs:
             docker ps -a
           "
       # PING
-      - name: PING
-        run: |
-          sleep 5
-          PING=$(curl ${{ secrets.SSH_HOST }}:3000/ping)
-          echo $PING
-          if [ "$PING" != "\"pong\"" ]; then
-            exit 1
-          fi
+#      - name: PING
+#        run: |
+#          sleep 5
+#          PING=$(curl ${{ secrets.SSH_HOST }}:3000/ping)
+#          echo $PING
+#          if [ "$PING" != "\"pong\"" ]; then
+#            exit 1
+#          fi
